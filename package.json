@@ -1,0 +1,35 @@
+{
+  "name": "space-dl",
+  "version": "2.0.2",
+  "description": "Twitter space recording tool",
+  "main": "src/index.mjs",
+  "dependencies": {
+    "cac": "^6.7.12",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.1.0",
+    "twitterspace": "^1.1.1",
+    "ws": "^8.3.0"
+  },
+  "homepage": "https://github.com/space-dl/node-space-dl",
+  "bugs":{
+    "url": "https://github.com/space-dl/node-space-dl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/space-dl/node-space-dl.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "Twitter",
+    "Space",
+    "download",
+    "space-dl"
+  ],
+  "author": "tsubasa652 <tsubasa@tsubasa.ml> (https://github.com/tsubasa652)",
+  "license": "UNLICENSED",
+  "bin": {
+    "space-dl": "src/cli.mjs"
+  }
+}

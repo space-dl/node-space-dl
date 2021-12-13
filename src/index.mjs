@@ -25,11 +25,12 @@ async function get(url, method = "GET"){
     return res
 }
 
-export default class space_dl{
+export default class space_dl extends EventEmitter{
     
     #config
     #twitter
     constructor(configPath = defaultConfigPath, config = undefined){
+        super()
         if(!config){
             if(fs.existsSync(configPath)){
                 config = JSON.parse(fs.readFileSync(configPath))
@@ -136,13 +137,16 @@ export default class space_dl{
 
         ffmpeg(streamInfo.source.location)
             .on("start", ()=>{
+                this.emit("start")
                 console.log(`Recording of ${title} has started`)
             })
             .on("error", (err)=>{
+                this.emit("error")
                 throw new Error('Cannot record: ' + err.message)
             })
             .on("end", ()=>{
                 console.log("finished recording")
+                this.emit("end")
                 if(chatRecord) fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
             })
             .save(`${id}.mp3`)

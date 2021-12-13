@@ -60,50 +60,78 @@ export default class space_dl{
         id = id.replace(/^https?:\/\/(www\.)?twitter\.com\/i\/spaces\/|\/peek$/g, "")
     
         let spaceInfo = await this.#twitter.getSpaceInfo(id)
-        let {title} = spaceInfo.audioSpace.metadata
-        console.log(`title: ${spaceInfo.audioSpace.metadata.title}`)
-        let streamInfo = await this.#twitter.getSpaceStreamInfo(null, spaceInfo.audioSpace.metadata)
+        let {metadata} = spaceInfo.audioSpace
+        let {title} = metadata
+        console.log(`title: ${metadata.title}`)
+        let streamInfo = await this.#twitter.getSpaceStreamInfo(null, metadata)
         let chatInfo = await this.#twitter.accessChatPublic(streamInfo.chatToken)
         let msgs = []
 
         if(chatRecord){
-            let socket = new WebSocket("wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow")
-            socket.onopen =function(){
-                socket.send(JSON.stringify({
-                    kind:3,
-                    payload: JSON.stringify({
-                        access_token: chatInfo.access_token
-                    })
-                }))
-                socket.send(JSON.stringify({
-                    kind: 2,
-                    payload: JSON.stringify({
-                        body:JSON.stringify({
-                            room: id
-                        }),
-                        kind: 1
-                    })
-                }))
-            }
-            socket.on("message", (msg)=>{
-                msg = JSON.parse(msg.toString())
-                if(msg.kind == 1){
-                    msg = JSON.parse(msg.payload)
-                    msg.body = JSON.parse(msg.body)
-                    if(msg.body.final){
-                        let tmp = {
-                            body: msg.body.body,
-                            timestamp: msg.timestamp,
-                            sender: msg.sender
+            if(metadata.is_space_available_for_replay){
+                let cursor = "", end=false
+                console.log("字幕ファイルのダウンロードを開始しました。")
+                while(!end){
+                    let history = await this.#twitter.getChatHistory(chatInfo.access_token, cursor)
+                    cursor = history.cursor
+                    if(cursor == "") end = true
+                    for(let msg of history.messages){
+                        if(msg.kind == 1){
+                            msg = JSON.parse(msg.payload)
+                            msg.body = JSON.parse(msg.body)
+                            if(msg.body.final){
+                                let tmp = {
+                                    body: msg.body.body,
+                                    timestamp: msg.timestamp,
+                                    sender: msg.sender
+                                }
+                                msgs.push(tmp)
+                            }
                         }
-                        msgs.push(tmp)
-                        fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
                     }
+                    fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
                 }
-            })
-            socket.on("close", ()=>{
-                fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
-            })
+                console.log("字幕ファイルのダウンロードが完了しました。")
+
+            }else{
+                let socket = new WebSocket("wss://prod-chatman-ancillary-ap-northeast-1.pscp.tv/chatapi/v1/chatnow")
+                socket.onopen =function(){
+                    socket.send(JSON.stringify({
+                        kind:3,
+                        payload: JSON.stringify({
+                            access_token: chatInfo.access_token
+                        })
+                    }))
+                    socket.send(JSON.stringify({
+                        kind: 2,
+                        payload: JSON.stringify({
+                            body:JSON.stringify({
+                                room: id
+                            }),
+                            kind: 1
+                        })
+                    }))
+                }
+                socket.on("message", (msg)=>{
+                    msg = JSON.parse(msg.toString())
+                    if(msg.kind == 1){
+                        msg = JSON.parse(msg.payload)
+                        msg.body = JSON.parse(msg.body)
+                        if(msg.body.final){
+                            let tmp = {
+                                body: msg.body.body,
+                                timestamp: msg.timestamp,
+                                sender: msg.sender
+                            }
+                            msgs.push(tmp)
+                            fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
+                        }
+                    }
+                })
+                socket.on("close", ()=>{
+                    fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
+                })
+            }
         }
 
         ffmpeg(streamInfo.source.location)

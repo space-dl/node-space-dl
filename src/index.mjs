@@ -68,6 +68,21 @@ export default class space_dl extends EventEmitter{
         let chatInfo = await this.#twitter.accessChatPublic(streamInfo.chatToken)
         let msgs = []
 
+        ffmpeg(streamInfo.source.location)
+            .on("start", ()=>{
+                this.emit("start")
+                console.log(`Recording of ${title} has started`)
+            })
+            .on("error", (err)=>{
+                this.emit("error")
+                throw new Error('Cannot record: ' + err.message)
+            })
+            .on("end", ()=>{
+                console.log("finished recording")
+                this.emit("end")
+                if(chatRecord) fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
+            })
+            .save(`${id}.mp3`)
         if(chatRecord){
             if(metadata.is_space_available_for_replay){
                 let cursor = "", end=false
@@ -134,22 +149,6 @@ export default class space_dl extends EventEmitter{
                 })
             }
         }
-
-        ffmpeg(streamInfo.source.location)
-            .on("start", ()=>{
-                this.emit("start")
-                console.log(`Recording of ${title} has started`)
-            })
-            .on("error", (err)=>{
-                this.emit("error")
-                throw new Error('Cannot record: ' + err.message)
-            })
-            .on("end", ()=>{
-                console.log("finished recording")
-                this.emit("end")
-                if(chatRecord) fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
-            })
-            .save(`${id}.mp3`)
     }
 
     async getSpaceID(screenName){

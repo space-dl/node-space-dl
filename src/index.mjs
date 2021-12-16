@@ -58,6 +58,7 @@ export default class space_dl extends EventEmitter{
     }
 
     async download(id, chatRecord = false){
+        id = id.split("?")[0]
         id = id.replace(/^https?:\/\/(www\.)?twitter\.com\/i\/spaces\/|\/peek$/g, "")
     
         let spaceInfo = await this.#twitter.getSpaceInfo(id)

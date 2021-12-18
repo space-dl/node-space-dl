@@ -17,6 +17,7 @@ async function download(url, options){
             return 1
         }
         let spacedl = new space_dl()
+        let opt = {}
         if(options.i && options.u){
             throw new Error("不正な引数")
         }
@@ -24,7 +25,10 @@ async function download(url, options){
         if(options.u){
             url = await spacedl.getSpaceID(url)
         }
-        spacedl.download(url, options.s)
+        if(options.o){
+            opt.output = options.o
+        }
+        spacedl.download(url, options.s, opt)
 
     }catch(e){
         console.log(e.message)
@@ -36,12 +40,14 @@ cli.command('[url]', 'record Twitter Space')
     .option('-i', 'record with Twitter SpaceID or URL')
     .option("-u, --user", 'record with Twitter screen name or Twitter account URL')
     .option("-s", "save subtitle")
+    .option("-o <output>", "output file format and path setting")
     .action(download)
 
 cli.command("download <url>", 'download with Twitter SpaceID or URL')
     .option('-i', 'record with Twitter SpaceID or URL')
     .option("-u, --user", 'record with Twitter screen name or Twitter account URL')
     .option("-s", "save subtitle")
+    .option("-o <output>", "output file format and path setting")
     .action(download)
 
 cli.command("token <token>", "set Twitter API v2 Token")

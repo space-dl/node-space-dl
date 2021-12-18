@@ -25,6 +25,15 @@ async function get(url, method = "GET"){
     return res
 }
 
+function deletemark(str){
+    const marks = ["\\",'/',':','*','?','a',"<",">",'|'];
+		
+    for(let mark of marks){
+        str = str.replace(mark, "");
+    }
+    return str
+}
+
 export default class space_dl extends EventEmitter{
     
     #config
@@ -57,17 +66,29 @@ export default class space_dl extends EventEmitter{
         return res
     }
 
-    async download(id, chatRecord = false){
+    async download(id, chatRecord = false, opt ={}){
         id = id.split("?")[0]
         id = id.replace(/^https?:\/\/(www\.)?twitter\.com\/i\/spaces\/|\/peek$/g, "")
     
-        let spaceInfo = await this.#twitter.getSpaceInfo(id)
-        let {metadata} = spaceInfo.audioSpace
+        const spaceInfo = await this.#twitter.getSpaceInfo(id)
+        const {metadata} = spaceInfo.audioSpace
         let {title} = metadata
         console.log(`title: ${metadata.title}`)
         let streamInfo = await this.#twitter.getSpaceStreamInfo(null, metadata)
         let chatInfo = await this.#twitter.accessChatPublic(streamInfo.chatToken)
         let msgs = []
+        let output = `${id}.mp3`
+        if(opt["output"]){
+            let out = opt.output
+            out = out.replace(/\{title\}/g, deletemark(title))
+            out = out.replace(/\{id\}/g, id)
+            out = out.replace(/\{ext\}/g, "mp3")
+            let start = new Date(metadata.started_at)
+            out = out.replace(/\{startDay\}/g, `${start.getFullYear()}-${start.getMonth()+1}-${start.getDate()}`)
+            out = out.replace(/\{screenName\}/g, metadata.creator_results.result.legacy.screen_name)
+            out = out.replace(/\{displayName\}/g, deletemark(metadata.creator_results.result.legacy.name))
+            output = out
+        }
 
         ffmpeg(streamInfo.source.location)
             .on("start", ()=>{
@@ -75,15 +96,15 @@ export default class space_dl extends EventEmitter{
                 console.log(`Recording of ${title} has started`)
             })
             .on("error", (err)=>{
-                this.emit("error")
                 throw new Error('Cannot record: ' + err.message)
+                this.emit("error")
             })
             .on("end", ()=>{
                 console.log("finished recording")
                 this.emit("end")
                 if(chatRecord) fs.writeFileSync(`${id}.json`, JSON.stringify(msgs))
             })
-            .save(`${id}.mp3`)
+            .save(output)
         if(chatRecord){
             if(metadata.state == "Ended" && metadata.is_space_available_for_replay){
                 let cursor = "", end=false

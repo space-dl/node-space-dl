@@ -85,7 +85,7 @@ export default class space_dl extends EventEmitter{
             })
             .save(`${id}.mp3`)
         if(chatRecord){
-            if(metadata.is_space_available_for_replay){
+            if(metadata.state == "Ended" && metadata.is_space_available_for_replay){
                 let cursor = "", end=false
                 console.log("字幕ファイルのダウンロードを開始しました。")
                 while(!end){

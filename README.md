@@ -4,6 +4,8 @@
     <p>Command line tool for recording Twitter space</p>
 </div>
 
+![space-dl-demo](https://user-images.githubusercontent.com/34929737/169988909-ead9c636-e1f4-42a3-b085-6c61f016bbde.gif)
+
 [English](README.md)/[日本語](README_ja.md)
 
 ## Requirement

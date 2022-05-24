@@ -1,7 +1,10 @@
 <div align="center">
+    <img src="img/logo.png">
     <h1>space-dl</h1>
     <p>Command line tool for recording Twitter space</p>
 </div>
+
+[English](README.md)/[日本語](README_ja.md)
 
 ## Requirement
 

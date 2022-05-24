@@ -5,7 +5,7 @@
 
 ## Requirement
 
-ffmpeg
+[Node.js](https://nodejs.org/) [ffmpeg](https://ffmpeg.org/)
 
 ## Install
 
@@ -37,3 +37,12 @@ Run the command below to set the Twitter API v2 token
 ```bash
 $ space-dl token <Twitter API v2 Token>
 ```
+
+## Author
+
+[tsubasa652](https://github.com/tsubasa652)
+
+## LICENSE
+
+This software is released under the GNU General Public License v3.0 License, see [LICENSE](LICENSE).
+

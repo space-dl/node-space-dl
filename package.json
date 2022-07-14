@@ -1,6 +1,6 @@
 {
   "name": "space-dl",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Twitter space recording tool",
   "main": "src/index.mjs",
   "dependencies": {

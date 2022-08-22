@@ -68,8 +68,6 @@ export default class space_dl extends EventEmitter{
 
     async download(id, chatRecord = false, opt ={}){
         id = id.replace(/^https?:\/\/(www\.)?twitter\.com\/i\/spaces\/|(\/peek|\?.+)?\/?$/g, "")
-        console.log(id)
-        return
     
         const spaceInfo = await this.#twitter.getSpaceInfo(id)
         const {metadata} = spaceInfo.audioSpace
